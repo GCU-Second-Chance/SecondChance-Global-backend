@@ -5,17 +5,17 @@ import (
 	"log"
 	"net/http"
 
-	"SecondChance-Global-backend/internal/config"
-	"SecondChance-Global-backend/internal/router"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/config"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/router"
 )
 
 func main() {
-	cfg := config.Load()
+	config.Load()
 
 	routerInstance := router.NewRouter()
 	r := routerInstance.SetupRoutes()
 
-	serverAddr := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
+	serverAddr := fmt.Sprintf("%s:%s", config.Cfg.Server.Host, config.Cfg.Server.Port)
 
 	log.Printf("Server starting on %s", serverAddr)
 	log.Printf("Health check: http://%s/api/v1/health", serverAddr)

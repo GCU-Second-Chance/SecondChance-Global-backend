@@ -1,13 +1,33 @@
 package model
 
-import "fmt"
-
 type CountryType int
 
 const (
 	American CountryType = iota
 	Korean
 )
+
+type Dog struct {
+	ID          int64
+	Name        string
+	Age         string
+	Images      []string
+	Gender      string
+	Breed       string
+	Location    Location
+	Shelter     Shelter
+	CountryType string
+}
+
+type Location struct {
+	Country string
+	City    string
+}
+
+type Shelter struct {
+	Name    string
+	Contact string
+	Email   string
 
 func StringToCountryType(countryStr string) (CountryType, error) {
 	switch countryStr {
@@ -18,19 +38,6 @@ func StringToCountryType(countryStr string) (CountryType, error) {
 	default:
 		return -1, fmt.Errorf("invalid country: %s", countryStr)
 	}
-}
-
-type Dog struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Breed       string `json:"breed"`
-	Age         int    `json:"age"`
-	Gender      string `json:"gender"`
-	Description string `json:"description"`
-	ImageURL    string `json:"image_url"`
-	Location    string `json:"location"`
-	Address     string `json:"address"`
-	Status      string `json:"status"`
 }
 
 type DogsResponse struct {

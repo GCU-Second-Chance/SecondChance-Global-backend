@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"SecondChance-Global-backend/internal/model"
-	"SecondChance-Global-backend/internal/service"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/service"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type DogHandler struct {

@@ -1,8 +1,8 @@
 package router
 
 import (
-	"SecondChance-Global-backend/internal/handler"
-	"SecondChance-Global-backend/internal/service"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/handler"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/service"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

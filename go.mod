@@ -1,4 +1,4 @@
-module SecondChance-Global-backend
+module github.com/GCU-Second-Chance/SecondChance-Global-backend
 
 go 1.21
 

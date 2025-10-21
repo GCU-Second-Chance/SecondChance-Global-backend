@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"SecondChance-Global-backend/internal/service"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/service"
 )
 
 type HealthHandler struct {
