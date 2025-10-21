@@ -4,24 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/config"
-	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/model"
-	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/util"
 	"io"
 	"log/slog"
 	"math/rand"
 	"net/http"
 	"strconv"
+
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/config"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/model"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/util"
 )
 
 const (
 	TotalPages = 1715
 	Type       = "dog"
 	Status     = "adoptable"
-	Limit      = "100"
+	Limit      = "10"
 )
 
-func GetDogByID(ctx context.Context, id int64) (*model.Dog, error) {
+func GetDogByIDFromPetfinder(ctx context.Context, id int64) (*model.Dog, error) {
 	url := util.PetfinderGetAnimalsURL + "/" + strconv.FormatInt(id, 10)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -49,7 +50,13 @@ func GetDogByID(ctx context.Context, id int64) (*model.Dog, error) {
 	return dog, nil
 }
 
-func GetDogsRandom(ctx context.Context) error {
+func GetDogsRandomFromPetfinder(ctx context.Context) ([]*model.Dog, error) {
+	select {
+	case <-ctx.Done():
+		return nil, fmt.Errorf("request was cancelled")
+	default:
+	}
+
 	randomPage := rand.Intn(TotalPages)
 
 	url := util.PetfinderGetAnimalsURL +
@@ -60,7 +67,7 @@ func GetDogsRandom(ctx context.Context) error {
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return fmt.Errorf("could not request petfinder: %w", err)
+		return nil, fmt.Errorf("could not request petfinder: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+config.Cfg.Petfinder.AccessToken)
@@ -78,12 +85,12 @@ func GetDogsRandom(ctx context.Context) error {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to request petfinder random api: %s", resp.Status)
+		return nil, fmt.Errorf("failed to request petfinder random api: %s", resp.Status)
 	}
 
 	var payload model.PetfinderDogsRandomResponse
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
-		return fmt.Errorf("could not decode petfinder random api response: %w", err)
+		return nil, fmt.Errorf("could not decode petfinder random api response: %w", err)
 	}
 
 	var dogs []*model.Dog
@@ -92,7 +99,7 @@ func GetDogsRandom(ctx context.Context) error {
 		copiedDog := dog
 		dogs = append(dogs, copiedDog)
 	}
-	return nil
+	return dogs, nil
 }
 
 func mapToDog(Animal model.Animal) *model.Dog {

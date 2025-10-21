@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 type CountryType int
 
 const (
@@ -28,6 +30,7 @@ type Shelter struct {
 	Name    string
 	Contact string
 	Email   string
+}
 
 func StringToCountryType(countryStr string) (CountryType, error) {
 	switch countryStr {
@@ -42,12 +45,12 @@ func StringToCountryType(countryStr string) (CountryType, error) {
 
 type DogsResponse struct {
 	Message string `json:"message"`
-	Data    []Dog  `json:"data,omitempty"`
+	Data    []*Dog `json:"data,omitempty"`
 }
 
 type DogResponse struct {
 	Message string `json:"message"`
-	Data    Dog    `json:"data,omitempty"`
+	Data    *Dog   `json:"data,omitempty"`
 }
 
 type GetDogByIDRequest struct {

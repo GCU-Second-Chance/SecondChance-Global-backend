@@ -2,7 +2,15 @@ package config
 
 import (
 	"os"
-	"strconv"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/rs/zerolog/log"
+)
+
+const (
+	envFileName = ".env"
+	envPrefix   = ""
 )
 
 type Config struct {
@@ -11,42 +19,22 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string
-	Host string
+	Port string `envconfig:"SERVER_PORT" default:"8080"`
+	Host string `envconfig:"SERVER_HOST" default:"localhost"`
 }
 
 type PetfinderConfig struct {
-	ClientID     string
-	ClientSecret string
-	AccessToken  string
+	ClientID     string `envconfig:"PETFINDER_CLIENT_ID" required:"true"`
+	ClientSecret string `envconfig:"PETFINDER_CLIENT_SECRET" required:"true"`
+	AccessToken  string `envconfig:"PETFINDER_ACCESS_TOKEN" required:"true"`
 }
 
 var Cfg Config
 
 func Load() {
-	Cfg.Server = ServerConfig{
-		Port: getEnv("SERVER_PORT", "8080"),
-		Host: getEnv("SERVER_HOST", "localhost"),
+	_ = godotenv.Load(envFileName)
+	if err := envconfig.Process(envPrefix, &Cfg); err != nil {
+		os.Exit(1)
 	}
-	Cfg.Petfinder = PetfinderConfig{
-		ClientID:     getEnv("PETFINDER_CLIENT_ID", ""),
-		ClientSecret: getEnv("PETFINDER_CLIENT_SECRET", ""),
-		AccessToken:  getEnv("PETFINDER_ACCESS_TOKEN", ""),
-	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
-func getEnvAsInt(key string, defaultValue int) int {
-	if value := os.Getenv(key); value != "" {
-		if intValue, err := strconv.Atoi(value); err == nil {
-			return intValue
-		}
-	}
-	return defaultValue
+	log.Info().Msg("successfully loaded configs")
 }
