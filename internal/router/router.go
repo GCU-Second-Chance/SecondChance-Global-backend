@@ -10,24 +10,20 @@ import (
 )
 
 type Router struct {
-	healthHandler    *handler.HealthHandler
-	dogHandler       *handler.DogHandler
-	challengeHandler *handler.ChallengeHandler
+	healthHandler *handler.HealthHandler
+	dogHandler    *handler.DogHandler
 }
 
 func NewRouter() *Router {
 	healthService := service.NewHealthService()
 	dogService := service.NewDogService()
-	challengeService := service.NewChallengeService()
 
 	healthHandler := handler.NewHealthHandler(healthService)
 	dogHandler := handler.NewDogHandler(dogService)
-	challengeHandler := handler.NewChallengeHandler(challengeService)
 
 	return &Router{
-		healthHandler:    healthHandler,
-		dogHandler:       dogHandler,
-		challengeHandler: challengeHandler,
+		healthHandler: healthHandler,
+		dogHandler:    dogHandler,
 	}
 }
 
@@ -46,7 +42,7 @@ func (r *Router) SetupRoutes() *chi.Mux {
 		MaxAge:           300,
 	}))
 
-	router.Route("/api", func(router chi.Router) {
+	router.Route("/api/v1", func(router chi.Router) {
 		// Health
 		router.Get("/health", r.healthHandler.GetHealth)
 
@@ -54,11 +50,6 @@ func (r *Router) SetupRoutes() *chi.Mux {
 		router.Route("/dogs", func(router chi.Router) {
 			router.Get("/random", r.dogHandler.GetRandomDog)
 			router.Get("/{id}", r.dogHandler.GetDogByID)
-		})
-
-		// Challenge
-		router.Route("/challenge", func(router chi.Router) {
-			router.Post("/upload", r.challengeHandler.GetPreSignedUrl)
 		})
 	})
 
