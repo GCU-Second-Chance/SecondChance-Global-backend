@@ -22,9 +22,6 @@ const (
 )
 
 func GetDogByID(ctx context.Context, id int64) (*model.Dog, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), util.ContextTimeout)
-	defer cancel()
-
 	url := util.PetfinderGetAnimalsURL + "/" + strconv.FormatInt(id, 10)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -52,41 +49,7 @@ func GetDogByID(ctx context.Context, id int64) (*model.Dog, error) {
 	return dog, nil
 }
 
-func mapToDog(Animal model.Animal) *model.Dog {
-	var images []string
-
-	for _, photos := range Animal.Photos {
-		small := photos.Small
-		medium := photos.Medium
-		large := photos.Large
-		full := photos.Full
-		images = append(images, small, medium, large, full)
-	}
-
-	return &model.Dog{
-		ID:     Animal.ID,
-		Name:   Animal.Name,
-		Age:    Animal.Age,
-		Images: images,
-		Gender: Animal.Gender,
-		Breed:  Animal.Breeds.Primary,
-		Location: model.Location{
-			Country: Animal.Contact.Address.Country,
-			City:    Animal.Contact.Address.City,
-		},
-		Shelter: model.Shelter{
-			Name:    "Petfinder",
-			Contact: Animal.Contact.Phone,
-			Email:   Animal.Contact.Email,
-		},
-		CountryType: util.PetfinderCountryType,
-	}
-}
-
 func GetDogsRandom(ctx context.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), util.ContextTimeout)
-	defer cancel()
-
 	randomPage := rand.Intn(TotalPages)
 
 	url := util.PetfinderGetAnimalsURL +
@@ -130,4 +93,35 @@ func GetDogsRandom(ctx context.Context) error {
 		dogs = append(dogs, copiedDog)
 	}
 	return nil
+}
+
+func mapToDog(Animal model.Animal) *model.Dog {
+	var images []string
+
+	for _, photos := range Animal.Photos {
+		small := photos.Small
+		medium := photos.Medium
+		large := photos.Large
+		full := photos.Full
+		images = append(images, small, medium, large, full)
+	}
+
+	return &model.Dog{
+		ID:     Animal.ID,
+		Name:   Animal.Name,
+		Age:    Animal.Age,
+		Images: images,
+		Gender: Animal.Gender,
+		Breed:  Animal.Breeds.Primary,
+		Location: model.Location{
+			Country: Animal.Contact.Address.Country,
+			City:    Animal.Contact.Address.City,
+		},
+		Shelter: model.Shelter{
+			Name:    "Petfinder",
+			Contact: Animal.Contact.Phone,
+			Email:   Animal.Contact.Email,
+		},
+		CountryType: util.PetfinderCountryType,
+	}
 }
