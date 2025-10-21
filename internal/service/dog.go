@@ -4,90 +4,168 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"math/rand"
+	"time"
+
+	"SecondChance-Global-backend/internal/model"
 )
 
 type DogService struct{}
-
-type Dog struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Breed       string `json:"breed"`
-	Age         int    `json:"age"`
-	Gender      string `json:"gender"`
-	Description string `json:"description"`
-	ImageURL    string `json:"image_url"`
-	Location    string `json:"location"`
-	Address     string `json:"address"`
-	Status      string `json:"status"`
-}
-
-type DogsResponse struct {
-	Message string `json:"message"`
-	Data    []Dog  `json:"data,omitempty"`
-}
-
-type DogResponse struct {
-	Message string `json:"message"`
-	Data    Dog    `json:"data,omitempty"`
-}
 
 func NewDogService() *DogService {
 	return &DogService{}
 }
 
-func (s *DogService) GetDogByID(ctx context.Context, id string) *DogResponse {
+func (s *DogService) GetDogByID(ctx context.Context, country model.CountryType, id int64) (*model.DogResponse, error) {
 	select {
 	case <-ctx.Done():
-		return &DogResponse{
-			Message: "Request was cancelled",
-		}
+		return nil, fmt.Errorf("request was cancelled")
 	default:
 	}
 
-	dogID, err := strconv.Atoi(id)
+	switch country {
+	case model.American:
+		americanDog, err := s.getAmericanDogDataById(id)
+		if err != nil {
+			return nil, err
+		}
+		return &model.DogResponse{
+			Message: fmt.Sprintf("Get American dog with id: %d", id),
+			Data:    americanDog,
+		}, nil
+	case model.Korean:
+		koreanDog, err := s.getKoreanDogDataById(id)
+		if err != nil {
+			return nil, err
+		}
+		return &model.DogResponse{
+			Message: fmt.Sprintf("Get Korean dog with id: %d", id),
+			Data:    koreanDog,
+		}, nil
+	default:
+		return nil, fmt.Errorf("invalid country: %v", country)
+	}
+}
+
+func (s *DogService) GetRandomDog(ctx context.Context) (*model.DogsResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, fmt.Errorf("request was cancelled")
+	default:
+	}
+
+	americanDogsData, err := s.getAmericanDogsData()
 	if err != nil {
-		return &DogResponse{
-			Message: "Invalid dog ID",
-		}
+		return nil, err
+	}
+	koreanDogsData, err := s.getKoreanDogsData()
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO: ID로 해당 유기견 조회 (외부 API 호출)
+	allDogsData := append(americanDogsData, koreanDogsData...)
 
-	// 임시 데이터에서 찾기
-	if dogID < 1 || dogID > len(s.getDogsData()) {
-		return &DogResponse{
-			Message: "Dog not found",
-		}
-	}
-	dogs := s.getDogsData()
-	return &DogResponse{
-		Message: fmt.Sprintf("Get dog with id: %d", dogID),
-		Data:    dogs[dogID-1],
-	}
+	// 랜덤으로 섞기
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(allDogsData), func(i, j int) {
+		allDogsData[i], allDogsData[j] = allDogsData[j], allDogsData[i]
+	})
+
+	return &model.DogsResponse{
+		Message: "Random dogs selected from American and Korean data",
+		Data:    allDogsData,
+	}, nil
 }
 
-func (s *DogService) GetRandomDog(ctx context.Context) *DogsResponse {
-	select {
-	case <-ctx.Done():
-		return &DogsResponse{
-			Message: "Request was cancelled",
-		}
+func (s *DogService) getAmericanDogsData() ([]model.Dog, error) {
+	return []model.Dog{
+		{
+			ID:          1,
+			Name:        "mungmung",
+			Breed:       "믹스",
+			Age:         3,
+			Gender:      "수컷",
+			Description: "활발하고 친근한 성격의 강아지입니다.",
+			ImageURL:    "https://example.com/dog1.jpg",
+			Location:    "서울시 강남구",
+			Address:     "서울시 강남구 강남대로 123",
+			Status:      "available",
+		},
+		{
+			ID:          2,
+			Name:        "bbobbi",
+			Breed:       "골든리트리버",
+			Age:         2,
+			Gender:      "암컷",
+			Description: "온순하고 똑똑한 강아지입니다.",
+			ImageURL:    "https://example.com/dog2.jpg",
+			Location:    "서울시 서초구",
+			Address:     "서울시 서초구 서초대로 456",
+			Status:      "available",
+		},
+		{
+			ID:          3,
+			Name:        "choco",
+			Breed:       "시바견",
+			Age:         4,
+			Gender:      "수컷",
+			Description: "독립적이지만 충성심이 강한 강아지입니다.",
+			ImageURL:    "https://example.com/dog3.jpg",
+			Location:    "서울시 마포구",
+			Address:     "서울시 마포구 마포대로 789",
+			Status:      "reserved",
+		},
+	}, nil
+}
+
+func (s *DogService) getAmericanDogDataById(id int64) (model.Dog, error) {
+	switch id {
+	case 1:
+		return model.Dog{
+			ID:          1,
+			Name:        "mungmung",
+			Breed:       "믹스",
+			Age:         3,
+			Gender:      "수컷",
+			Description: "활발하고 친근한 성격의 강아지입니다.",
+			ImageURL:    "https://example.com/dog1.jpg",
+			Location:    "서울시 강남구",
+			Address:     "서울시 강남구 강남대로 123",
+			Status:      "available",
+		}, nil
+	case 2:
+		return model.Dog{
+			ID:          2,
+			Name:        "bbobbi",
+			Breed:       "골든리트리버",
+			Age:         2,
+			Gender:      "암컷",
+			Description: "온순하고 똑똑한 강아지입니다.",
+			ImageURL:    "https://example.com/dog2.jpg",
+			Location:    "서울시 서초구",
+			Address:     "서울시 서초구 서초대로 456",
+			Status:      "available",
+		}, nil
+	case 3:
+		return model.Dog{
+			ID:          3,
+			Name:        "choco",
+			Breed:       "시바견",
+			Age:         4,
+			Gender:      "수컷",
+			Description: "독립적이지만 충성심이 강한 강아지입니다.",
+			ImageURL:    "https://example.com/dog3.jpg",
+			Location:    "서울시 마포구",
+			Address:     "서울시 마포구 마포대로 789",
+			Status:      "reserved",
+		}, nil
 	default:
-	}
-
-	// TODO: 유기견 리스트 랜덤 조회 (외부 API 호출)
-
-	dogs := s.getDogsData()
-
-	return &DogsResponse{
-		Message: "Random dogs selected",
-		Data:    dogs,
+		return model.Dog{}, fmt.Errorf("invalid id: %d", id)
 	}
 }
 
-func (s *DogService) getDogsData() []Dog {
-	return []Dog{
+func (s *DogService) getKoreanDogsData() ([]model.Dog, error) {
+	return []model.Dog{
 		{
 			ID:          1,
 			Name:        "멍멍이",
@@ -124,15 +202,67 @@ func (s *DogService) getDogsData() []Dog {
 			Address:     "서울시 마포구 마포대로 789",
 			Status:      "reserved",
 		},
+	}, nil
+}
+
+func (s *DogService) getKoreanDogDataById(id int64) (model.Dog, error) {
+	switch id {
+	case 1:
+		return model.Dog{
+			ID:          1,
+			Name:        "멍멍이",
+			Breed:       "믹스",
+			Age:         3,
+			Gender:      "수컷",
+			Description: "활발하고 친근한 성격의 강아지입니다.",
+			ImageURL:    "https://example.com/dog1.jpg",
+			Location:    "서울시 강남구",
+			Address:     "서울시 강남구 강남대로 123",
+			Status:      "available",
+		}, nil
+	case 2:
+		return model.Dog{
+			ID:          2,
+			Name:        "뽀삐",
+			Breed:       "골든리트리버",
+			Age:         2,
+			Gender:      "암컷",
+			Description: "온순하고 똑똑한 강아지입니다.",
+			ImageURL:    "https://example.com/dog2.jpg",
+			Location:    "서울시 서초구",
+			Address:     "서울시 서초구 서초대로 456",
+			Status:      "available",
+		}, nil
+	case 3:
+		return model.Dog{
+			ID:          3,
+			Name:        "초코",
+			Breed:       "시바견",
+			Age:         4,
+			Gender:      "수컷",
+			Description: "독립적이지만 충성심이 강한 강아지입니다.",
+			ImageURL:    "https://example.com/dog3.jpg",
+			Location:    "서울시 마포구",
+			Address:     "서울시 마포구 마포대로 789",
+			Status:      "reserved",
+		}, nil
+	default:
+		return model.Dog{}, fmt.Errorf("invalid id: %d", id)
 	}
 }
 
-func (s *DogService) GetDogByIDJSON(ctx context.Context, id string) ([]byte, error) {
-	response := s.GetDogByID(ctx, id)
+func (s *DogService) GetDogByIDJSON(ctx context.Context, country model.CountryType, id int64) ([]byte, error) {
+	response, err := s.GetDogByID(ctx, country, id)
+	if err != nil {
+		return nil, err
+	}
 	return json.Marshal(response)
 }
 
 func (s *DogService) GetRandomDogJSON(ctx context.Context) ([]byte, error) {
-	response := s.GetRandomDog(ctx)
+	response, err := s.GetRandomDog(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return json.Marshal(response)
 }

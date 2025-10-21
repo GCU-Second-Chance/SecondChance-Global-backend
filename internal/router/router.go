@@ -49,7 +49,7 @@ func (r *Router) SetupRoutes() *chi.Mux {
 		// Dog
 		router.Route("/dogs", func(router chi.Router) {
 			router.Get("/random", r.dogHandler.GetRandomDog)
-			router.Get("/{id}", r.dogHandler.GetDogByID)
+			router.Get("/", r.dogHandler.GetDogByID)
 		})
 	})
 
