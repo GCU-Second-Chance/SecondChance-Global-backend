@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"SecondChance-Global-backend/internal/model"
 	"SecondChance-Global-backend/internal/service"
-
-	"github.com/go-chi/chi/v5"
 )
 
 type DogHandler struct {
@@ -23,11 +24,21 @@ func (h *DogHandler) GetDogByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	id := chi.URLParam(r, "id")
+	var request model.GetDogByIDRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
-	jsonData, err := h.dogService.GetDogByIDJSON(ctx, id)
+	country, err := model.StringToCountryType(request.Country)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jsonData, err := h.dogService.GetDogByIDJSON(ctx, country, request.ID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get dog: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -42,7 +53,7 @@ func (h *DogHandler) GetRandomDog(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, err := h.dogService.GetRandomDogJSON(ctx)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("failed to get random dog: %v", err), http.StatusInternalServerError)
 		return
 	}
 
