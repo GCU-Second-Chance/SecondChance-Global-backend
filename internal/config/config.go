@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig
+	Server    ServerConfig
+	Petfinder PetfinderConfig
 }
 
 type ServerConfig struct {
@@ -14,12 +15,23 @@ type ServerConfig struct {
 	Host string
 }
 
-func Load() *Config {
-	return &Config{
-		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8080"),
-			Host: getEnv("SERVER_HOST", "localhost"),
-		},
+type PetfinderConfig struct {
+	ClientID     string
+	ClientSecret string
+	AccessToken  string
+}
+
+var Cfg Config
+
+func Load() {
+	Cfg.Server = ServerConfig{
+		Port: getEnv("SERVER_PORT", "8080"),
+		Host: getEnv("SERVER_HOST", "localhost"),
+	}
+	Cfg.Petfinder = PetfinderConfig{
+		ClientID:     getEnv("PETFINDER_CLIENT_ID", ""),
+		ClientSecret: getEnv("PETFINDER_CLIENT_SECRET", ""),
+		AccessToken:  getEnv("PETFINDER_ACCESS_TOKEN", ""),
 	}
 }
 
