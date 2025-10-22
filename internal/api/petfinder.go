@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	TotalPages = 1715
+	TotalPages = 1715 // 최대 Page 범위
 	Type       = "dog"
 	Status     = "adoptable"
 	Limit      = "10"
@@ -46,7 +46,7 @@ func GetDogByIDFromPetfinder(ctx context.Context, id int64) (*model.Dog, error) 
 		return nil, fmt.Errorf("could not decode petfinder random api response: %w", err)
 	}
 
-	dog := mapToDog(payload.Animal)
+	dog := mapAnimalToDog(payload.Animal)
 	return dog, nil
 }
 
@@ -95,17 +95,17 @@ func GetDogsRandomFromPetfinder(ctx context.Context) ([]*model.Dog, error) {
 
 	var dogs []*model.Dog
 	for _, animal := range payload.Animals {
-		dog := mapToDog(animal)
+		dog := mapAnimalToDog(animal)
 		copiedDog := dog
 		dogs = append(dogs, copiedDog)
 	}
 	return dogs, nil
 }
 
-func mapToDog(Animal model.Animal) *model.Dog {
+func mapAnimalToDog(animal model.Animal) *model.Dog {
 	var images []string
 
-	for _, photos := range Animal.Photos {
+	for _, photos := range animal.Photos {
 		small := photos.Small
 		medium := photos.Medium
 		large := photos.Large
@@ -114,20 +114,20 @@ func mapToDog(Animal model.Animal) *model.Dog {
 	}
 
 	return &model.Dog{
-		ID:     Animal.ID,
-		Name:   Animal.Name,
-		Age:    Animal.Age,
+		ID:     animal.ID,
+		Name:   animal.Name,
+		Age:    animal.Age,
 		Images: images,
-		Gender: Animal.Gender,
-		Breed:  Animal.Breeds.Primary,
+		Gender: animal.Gender,
+		Breed:  animal.Breeds.Primary,
 		Location: model.Location{
-			Country: Animal.Contact.Address.Country,
-			City:    Animal.Contact.Address.City,
+			Country: animal.Contact.Address.Country,
+			City:    animal.Contact.Address.City,
 		},
 		Shelter: model.Shelter{
 			Name:    "Petfinder",
-			Contact: Animal.Contact.Phone,
-			Email:   Animal.Contact.Email,
+			Contact: animal.Contact.Phone,
+			Email:   animal.Contact.Email,
 		},
 		CountryType: util.PetfinderCountryType,
 	}
