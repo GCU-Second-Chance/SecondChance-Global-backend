@@ -50,7 +50,7 @@ jobs:
       - name: Checkout deployment repo
         uses: actions/checkout@v3
         with:
-          repository: teletwoboy/teletwoboy-manifest
+          repository: GCU-Second-Chance/SecondChance-Manifest
           path: manifests
           token: ${{ secrets.ORG_GITHUB_KEY }}
 
