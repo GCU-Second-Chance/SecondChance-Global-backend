@@ -56,7 +56,7 @@ jobs:
 
       - name: Update manifest
         run: |
-          sed -i "s|image: .*|image: asia-northeast3-docker.pkg.dev/${{ secrets.ORG_PRD_GCP_PROJECT_ID }}/${{ secrets.ORG_PRD_GCP_REGISTRY_NAME }}/secondchance-global-prd:${{ github.sha }}${{ github.run_attempt }}|" manifests/prd/secondchance-global/deployment.yaml
+          sed -i "s|image: .*|image: asia-northeast3-docker.pkg.dev/${{ secrets.ORG_PRD_GCP_PROJECT_ID }}/${{ secrets.ORG_PRD_GCP_REGISTRY_NAME }}/secondchance-global-prd:${{ github.sha }}${{ github.run_attempt }}|" manifests/prd/deployment.yaml
 
       - name: Commit and push changes
         working-directory: manifests
