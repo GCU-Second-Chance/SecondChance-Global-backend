@@ -23,7 +23,6 @@ func main() {
 	log.Printf("  GET  /api/v1/health")
 	log.Printf("  GET  /api/v1/dogs/random")
 	log.Printf("  GET  /api/v1/dogs/{id}")
-	log.Printf("  POST /api/v1/challenge/upload")
 
 	if err := http.ListenAndServe(serverAddr, r); err != nil {
 		log.Fatal("Server failed to start:", err)
