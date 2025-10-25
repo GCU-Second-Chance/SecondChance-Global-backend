@@ -54,7 +54,7 @@ func GetTokenFromPetfinder(ctx context.Context) (string, error) {
 	return tokenResp.AccessToken, nil
 }
 
-func GetDogByIDFromPetfinder(ctx context.Context, id int64) (*model.Dog, error) {
+func GetDogByIDFromPetfinder(ctx context.Context, petfinderToken string, id int64) (*model.Dog, error) {
 	url := util.PetfinderGetAnimalsURL + "/" + strconv.FormatInt(id, 10)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -62,7 +62,7 @@ func GetDogByIDFromPetfinder(ctx context.Context, id int64) (*model.Dog, error) 
 		return nil, fmt.Errorf("failed to get petfinder dog %d: build request: %w", id, err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+config.Cfg.Petfinder.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+petfinderToken)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -87,7 +87,7 @@ func GetDogByIDFromPetfinder(ctx context.Context, id int64) (*model.Dog, error) 
 	return dog, nil
 }
 
-func GetDogsRandomFromPetfinder(ctx context.Context) ([]*model.Dog, error) {
+func GetDogsRandomFromPetfinder(ctx context.Context, petfinderToken string) ([]*model.Dog, error) {
 	select {
 	case <-ctx.Done():
 		return nil, fmt.Errorf("request was cancelled")
@@ -107,7 +107,7 @@ func GetDogsRandomFromPetfinder(ctx context.Context) ([]*model.Dog, error) {
 		return nil, fmt.Errorf("failed to get petfinder random dogs: build request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+config.Cfg.Petfinder.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+petfinderToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

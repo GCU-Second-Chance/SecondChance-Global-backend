@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/api"
+	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/middleware"
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/model"
 )
 
@@ -24,9 +25,14 @@ func (s *DogService) GetDogByID(ctx context.Context, country model.CountryType, 
 	default:
 	}
 
+	token, ok := ctx.Value(middleware.PetfinderTokenKey).(string)
+	if !ok {
+		return nil, fmt.Errorf("petfinder token not found in context")
+	}
+
 	switch country {
 	case model.American:
-		americanDog, err := api.GetDogByIDFromPetfinder(ctx, id)
+		americanDog, err := api.GetDogByIDFromPetfinder(ctx, token, id)
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +41,7 @@ func (s *DogService) GetDogByID(ctx context.Context, country model.CountryType, 
 			Data:    americanDog,
 		}, nil
 	case model.Korean:
-		koreanDog, err := api.GetDogByIDFromPetfinder(ctx, id)
+		koreanDog, err := api.GetDogByIDFromPetfinder(ctx, token, id)
 		if err != nil {
 			return nil, err
 		}
@@ -54,12 +60,16 @@ func (s *DogService) GetRandomDog(ctx context.Context) (*model.DogsResponse, err
 		return nil, fmt.Errorf("request was cancelled")
 	default:
 	}
+	token, ok := ctx.Value(middleware.PetfinderTokenKey).(string)
+	if !ok {
+		return nil, fmt.Errorf("petfinder token not found in context")
+	}
 
-	americanDogsData, err := api.GetDogsRandomFromPetfinder(ctx)
+	americanDogsData, err := api.GetDogsRandomFromPetfinder(ctx, token)
 	if err != nil {
 		return nil, err
 	}
-	koreanDogsData, err := api.GetDogsRandomFromPetfinder(ctx)
+	koreanDogsData, err := api.GetDogsRandomFromPetfinder(ctx, token)
 	if err != nil {
 		return nil, err
 	}
