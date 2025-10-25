@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/config"
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/model"
-	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/util"
 	"io"
 	"log/slog"
 	"math/rand"
@@ -15,24 +14,17 @@ import (
 	"strconv"
 )
 
-const (
-	totalCount     = 2129
-	gyeonggiStatus = "보호중"
-	pSize          = 10
-	pIndex         = int(totalCount / pSize)
-)
-
 func GetDogsRandomFromGyeonggi(ctx context.Context) ([]*model.Dog, error) {
 	apiKey := config.Cfg.Gyeonggi.GyeonggiApiKey
-	randomPage := rand.Intn(pIndex) + 1
-	baseURL := util.GyeonggiGetAnimalsURL
+	randomPage := rand.Intn(GyeonggiPIndex) + 1
+	baseURL := GyeonggiGetAnimalsURL
 
 	params := url.Values{}
 	params.Add("KEY", apiKey)
 	params.Add("Type", "json")
 	params.Add("pIndex", fmt.Sprintf("%d", randomPage))
-	params.Add("pSize", fmt.Sprintf("%d", pSize))
-	params.Add("STATE_NM", gyeonggiStatus)
+	params.Add("pSize", fmt.Sprintf("%d", GyeonggiPSize))
+	params.Add("STATE_NM", GyeonggiStatus)
 
 	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 	fmt.Printf("📡 [요청] %s\n", reqURL)
@@ -79,20 +71,20 @@ func mapGyeonggiToDog(row model.AbdmRow) *model.Dog {
 
 	return &model.Dog{
 		ID:     id,
-		Name:   "empty",
+		Name:   GyeonggiEmpty,
 		Age:    row.AgeInfo,
 		Images: images,
 		Gender: row.SexNM,
 		Breed:  row.SpeciesNM,
 		Location: model.Location{
-			Country: "한국",
+			Country: GyeonggiCountry,
 			City:    row.JurisdInstNM,
 		},
 		Shelter: model.Shelter{
-			Name:    "Gyeonggi",
+			Name:    row.ShterNM,
 			Contact: row.ShterTelno,
-			Email:   "empty",
+			Email:   GyeonggiEmpty,
 		},
-		CountryType: util.GyeonggiCountryType,
+		CountryType: GyeonggiCountryType,
 	}
 }
