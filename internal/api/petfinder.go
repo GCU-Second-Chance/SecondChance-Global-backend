@@ -83,7 +83,7 @@ func GetDogByIDFromPetfinder(ctx context.Context, petfinderToken string, id int6
 		return nil, fmt.Errorf("failed to get petfinder dog %d: decode response: %w", id, err)
 	}
 
-	dog := mapAnimalToDog(payload.Animal)
+	dog := mapPetfinerToDog(payload.Animal)
 	return dog, nil
 }
 
@@ -132,14 +132,14 @@ func GetDogsRandomFromPetfinder(ctx context.Context, petfinderToken string) ([]*
 
 	var dogs []*model.Dog
 	for _, animal := range payload.Animals {
-		dog := mapAnimalToDog(animal)
+		dog := mapPetfinerToDog(animal)
 		copiedDog := dog
 		dogs = append(dogs, copiedDog)
 	}
 	return dogs, nil
 }
 
-func mapAnimalToDog(animal model.Animal) *model.Dog {
+func mapPetfinerToDog(animal model.Animal) *model.Dog {
 	var images []string
 
 	for _, photos := range animal.Photos {
