@@ -13,20 +13,12 @@ import (
 
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/config"
 	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/model"
-	"github.com/GCU-Second-Chance/SecondChance-Global-backend/internal/util"
-)
-
-const (
-	TotalPages = 1715 // 최대 Page 범위
-	Type       = "dog"
-	Status     = "adoptable"
-	Limit      = "10"
 )
 
 func GetTokenFromPetfinder(ctx context.Context) (string, error) {
 	clientID := config.Cfg.Petfinder.ClientID
 	clientSecret := config.Cfg.Petfinder.ClientSecret
-	url := util.PetfinderGetAccessTokenURL
+	url := PetfinderGetAccessTokenURL
 	data := []byte(fmt.Sprintf("grant_type=client_credentials&client_id=%s&client_secret=%s", clientID, clientSecret))
 
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
@@ -55,7 +47,7 @@ func GetTokenFromPetfinder(ctx context.Context) (string, error) {
 }
 
 func GetDogByIDFromPetfinder(ctx context.Context, petfinderToken string, id int64) (*model.Dog, error) {
-	url := util.PetfinderGetAnimalsURL + "/" + strconv.FormatInt(id, 10)
+	url := PetfinderGetAnimalsURL + "/" + strconv.FormatInt(id, 10)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -83,7 +75,7 @@ func GetDogByIDFromPetfinder(ctx context.Context, petfinderToken string, id int6
 		return nil, fmt.Errorf("failed to get petfinder dog %d: decode response: %w", id, err)
 	}
 
-	dog := mapAnimalToDog(payload.Animal)
+	dog := mapPetfinerToDog(payload.Animal)
 	return dog, nil
 }
 
@@ -94,12 +86,12 @@ func GetDogsRandomFromPetfinder(ctx context.Context, petfinderToken string) ([]*
 	default:
 	}
 
-	randomPage := rand.Intn(TotalPages)
+	randomPage := rand.Intn(PetfinderTotalPages)
 
-	url := util.PetfinderGetAnimalsURL +
-		"?type=" + Type +
-		"&status=" + Status +
-		"&limit" + Limit +
+	url := PetfinderGetAnimalsURL +
+		"?type=" + PetfinderType +
+		"&status=" + PetfinderStatus +
+		"&limit" + PetfinderLimit +
 		"&page=" + strconv.Itoa(randomPage)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -132,14 +124,14 @@ func GetDogsRandomFromPetfinder(ctx context.Context, petfinderToken string) ([]*
 
 	var dogs []*model.Dog
 	for _, animal := range payload.Animals {
-		dog := mapAnimalToDog(animal)
+		dog := mapPetfinerToDog(animal)
 		copiedDog := dog
 		dogs = append(dogs, copiedDog)
 	}
 	return dogs, nil
 }
 
-func mapAnimalToDog(animal model.Animal) *model.Dog {
+func mapPetfinerToDog(animal model.Animal) *model.Dog {
 	var images []string
 
 	for _, photos := range animal.Photos {
@@ -162,10 +154,10 @@ func mapAnimalToDog(animal model.Animal) *model.Dog {
 			City:    animal.Contact.Address.City,
 		},
 		Shelter: model.Shelter{
-			Name:    "Petfinder",
+			Name:    PetfinderShelterName,
 			Contact: animal.Contact.Phone,
 			Email:   animal.Contact.Email,
 		},
-		CountryType: util.PetfinderCountryType,
+		CountryType: PetfinderCountryType,
 	}
 }

@@ -16,6 +16,7 @@ const (
 type Config struct {
 	Server    ServerConfig
 	Petfinder PetfinderConfig
+	Gyeonggi  GyeonggiConfig
 }
 
 type ServerConfig struct {
@@ -27,6 +28,10 @@ type PetfinderConfig struct {
 	ClientID     string `envconfig:"PETFINDER_CLIENT_ID" required:"true"`
 	ClientSecret string `envconfig:"PETFINDER_CLIENT_SECRET" required:"true"`
 	AccessToken  string `envconfig:"PETFINDER_ACCESS_TOKEN" required:"true"`
+}
+
+type GyeonggiConfig struct {
+	GyeonggiApiKey string `envconfig:"GYEONGGI_API_KEY" required:"true"`
 }
 
 var Cfg Config
