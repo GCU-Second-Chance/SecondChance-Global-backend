@@ -69,7 +69,7 @@ func (s *DogService) GetRandomDog(ctx context.Context) (*model.DogsResponse, err
 	if err != nil {
 		return nil, err
 	}
-	koreanDogsData, err := api.GetDogsRandomFromPetfinder(ctx, token)
+	koreanDogsData, err := api.GetDogsRandomFromGyeonggi(ctx)
 	if err != nil {
 		return nil, err
 	}
