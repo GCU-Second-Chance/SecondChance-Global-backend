@@ -74,46 +74,6 @@ SecondChance-Global-backend/
 - **CORS**: go-chi/cors
 - **컨테이너**: Docker
 
-## ⚙️ 설치 및 실행
-
-### 1. 환경 변수 설정
-
-`.env` 파일을 생성하고 다음 환경 변수를 설정하세요:
-
-```env
-# 서버 설정
-SERVER_HOST=localhost
-SERVER_PORT=8080
-
-# Petfinder API 설정
-PETFINDER_CLIENT_ID=your_client_id
-PETFINDER_CLIENT_SECRET=your_client_secret
-PETFINDER_ACCESS_TOKEN=your_access_token
-
-# 경기도 API 설정
-GYEONGGI_API_KEY=your_gyeonggi_api_key
-```
-
-### 2. 로컬 실행
-
-```bash
-# 의존성 설치
-go mod download
-
-# 애플리케이션 실행
-go run cmd/main.go
-```
-
-### 3. Docker 실행
-
-```bash
-# Docker 이미지 빌드
-docker build -t secondchance-global .
-
-# 컨테이너 실행
-docker run -p 8080:8080 --env-file .env secondchance-global
-```
-
 ## 📊 데이터 소스
 
 ### 미국 데이터 (Petfinder)
